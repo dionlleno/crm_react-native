@@ -316,18 +316,45 @@ export const InicioScreen = () => {
 
         <Modal
           isVisible={modalDetalhesVisible}
-          onBackdropPress={() => {
-            setModalDetalhesVisible(false);
-            setErroValidacao(null);
-          }}
+          onBackdropPress={() => setModalDetalhesVisible(false)}
           style={styles.modal}
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Detalhes do Compromisso</Text>
-              <TouchableOpacity onPress={() => setModalDetalhesVisible(false)}>
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
+              <View style={styles.modalHeaderButtons}>
+                <TouchableOpacity 
+                  style={styles.modalActionButton}
+                  onPress={() => {
+                    setModalDetalhesVisible(false);
+                    setNovoCompromisso({
+                      titulo: compromissoSelecionado?.titulo || '',
+                      horario: compromissoSelecionado?.horario || '',
+                      local: compromissoSelecionado?.local || '',
+                      data: compromissoSelecionado?.data || '',
+                      tags: compromissoSelecionado?.tags || [],
+                      cliente: compromissoSelecionado?.cliente || '',
+                      imovel: compromissoSelecionado?.imovel || '',
+                      anotacao: compromissoSelecionado?.anotacao || ''
+                    });
+                    setModalVisible(true);
+                  }}
+                >
+                  <Ionicons name="create" size={24} color="#007AFF" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.modalActionButton}
+                  onPress={() => {
+                    setCompromissos(compromissos.filter(c => c.id !== compromissoSelecionado?.id));
+                    setModalDetalhesVisible(false);
+                  }}
+                >
+                  <Ionicons name="trash" size={24} color="#ff3b30" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setModalDetalhesVisible(false)}>
+                  <Ionicons name="close" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <ScrollView style={styles.modalForm}>
@@ -435,21 +462,6 @@ export const InicioScreen = () => {
                 </View>
               </View>
             </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.deleteButton]}
-                onPress={handleExcluirCompromisso}
-              >
-                <Text style={styles.deleteButtonText}>Excluir</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={handleEditarCompromisso}
-              >
-                <Text style={styles.saveButtonText}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </Modal>
 
@@ -462,7 +474,7 @@ export const InicioScreen = () => {
           style={styles.modal}
         >
           <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             style={styles.modalContent}
           >
             <View style={styles.modalHeader}>
@@ -472,7 +484,10 @@ export const InicioScreen = () => {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalForm}>
+            <ScrollView 
+              style={styles.modalForm}
+              keyboardShouldPersistTaps="handled"
+            >
               {erroValidacao && (
                 <View style={styles.erroContainer}>
                   <Text style={styles.erroText}>{erroValidacao}</Text>
@@ -732,6 +747,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     maxHeight: '80%',
   },
+  modalForm: {
+    padding: 20,
+  },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -744,9 +762,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-  },
-  modalForm: {
-    padding: 20,
   },
   inputContainer: {
     marginBottom: 15,
@@ -881,5 +896,13 @@ const styles = StyleSheet.create({
   erroText: {
     color: '#D32F2F',
     fontSize: 14,
+  },
+  modalHeaderButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  modalActionButton: {
+    padding: 4,
   },
 }); 
