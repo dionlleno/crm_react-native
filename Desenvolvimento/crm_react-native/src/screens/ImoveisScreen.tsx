@@ -326,11 +326,7 @@ export const ImoveisScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.headerTitle}>Imóveis</Text>
-          </View>
-        </View>
+        <Text style={styles.title}>Imóveis</Text>
       </View>
 
       <View style={styles.filtrosContainer}>
@@ -847,29 +843,20 @@ export const ImoveisScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F0F0F0',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
     backgroundColor: 'white',
+    padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    height: 60,
-  },
-  headerContent: {
-    flex: 1,
+    borderBottomColor: '#E0E0E0',
+    paddingTop: Platform.OS === 'android' ? 40 : 0,
     alignItems: 'center',
   },
-  headerLeft: {
-    alignItems: 'center',
-  },
-  headerTitle: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    textAlign: 'center',
   },
   filtrosContainer: {
     padding: 10,
