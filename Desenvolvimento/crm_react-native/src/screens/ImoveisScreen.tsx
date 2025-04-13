@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, TextInput, KeyboardAvoidingView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, TextInput, KeyboardAvoidingView, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Modal from 'react-native-modal';
+import * as ImagePicker from 'expo-image-picker';
 
 type Imovel = {
   id: string;
@@ -98,6 +99,7 @@ export const ImoveisScreen = () => {
   const [erroValidacao, setErroValidacao] = useState<string | null>(null);
   const [filtroAtivo, setFiltroAtivo] = useState<'todos' | 'apartamento' | 'casa' | 'terreno'>('todos');
   const [buscaEndereco, setBuscaEndereco] = useState('');
+  const [imagensPreview, setImagensPreview] = useState<string[]>([]);
 
   const tagsDisponiveis = [
     'Apartamento',
@@ -222,6 +224,104 @@ export const ImoveisScreen = () => {
       enderecoCompleto.toLowerCase().includes(buscaEndereco.toLowerCase());
     return passaFiltroEndereco;
   });
+
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permissão necessária',
+          'Precisamos da permissão para acessar suas fotos para adicionar imagens ao imóvel.'
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets) {
+        const novasImagens = result.assets.map(asset => asset.uri);
+        setImagensPreview([...imagensPreview, ...novasImagens]);
+        setNovoImovel(prev => ({
+          ...prev,
+          imagens: [...(prev.imagens || []), ...novasImagens]
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar imagens:', error);
+      Alert.alert(
+        'Erro',
+        'Ocorreu um erro ao selecionar as imagens. Por favor, tente novamente.'
+      );
+    }
+  };
+
+  const removerImagem = (index: number) => {
+    const novasImagens = [...imagensPreview];
+    novasImagens.splice(index, 1);
+    setImagensPreview(novasImagens);
+    setNovoImovel({
+      ...novoImovel,
+      imagens: novasImagens
+    });
+  };
+
+  const salvarImovel = () => {
+    const erro = validarCampos(novoImovel);
+    if (erro) {
+      setErroValidacao(erro);
+      return;
+    }
+
+    const imovelCompleto: Imovel = {
+      id: Date.now().toString(),
+      endereco: {
+        logradouro: novoImovel.endereco?.logradouro || '',
+        numero: novoImovel.endereco?.numero || '',
+        complemento: novoImovel.endereco?.complemento || '',
+        bairro: novoImovel.endereco?.bairro || '',
+        cidade: novoImovel.endereco?.cidade || '',
+        estado: novoImovel.endereco?.estado || '',
+        cep: novoImovel.endereco?.cep || ''
+      },
+      valor: novoImovel.valor || '',
+      area: novoImovel.area || '',
+      quartos: novoImovel.quartos || '',
+      banheiros: novoImovel.banheiros || '',
+      vagas: novoImovel.vagas || '',
+      tags: novoImovel.tags || [],
+      observacoes: novoImovel.observacoes || '',
+      imagens: novoImovel.imagens || []
+    };
+
+    setImoveis([...imoveis, imovelCompleto]);
+    setModalVisible(false);
+    setNovoImovel({
+      endereco: {
+        logradouro: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        estado: '',
+        cep: ''
+      },
+      valor: '',
+      area: '',
+      quartos: '',
+      banheiros: '',
+      vagas: '',
+      tags: [],
+      observacoes: '',
+      imagens: []
+    });
+    setImagensPreview([]);
+    setErroValidacao(null);
+  };
 
   return (
     <View style={styles.container}>
@@ -485,6 +585,7 @@ export const ImoveisScreen = () => {
         onBackdropPress={() => {
           setModalVisible(false);
           setErroValidacao(null);
+          setImagensPreview([]);
         }}
         style={styles.modal}
       >
@@ -690,16 +791,37 @@ export const ImoveisScreen = () => {
               <View style={styles.imagensUploadContainer}>
                 <TouchableOpacity 
                   style={styles.uploadButton}
-                  onPress={() => {
-                    // Aqui você implementaria a lógica de upload de imagens
-                    // Por exemplo, usando ImagePicker ou outra biblioteca
-                  }}
+                  onPress={pickImage}
                 >
                   <Ionicons name="images" size={24} color="#007AFF" />
                   <Text style={styles.uploadButtonText}>Adicionar Imagens</Text>
                 </TouchableOpacity>
               </View>
             </View>
+
+            {imagensPreview.length > 0 && (
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                style={styles.imagensPreviewContainer}
+              >
+                {imagensPreview.map((uri, index) => (
+                  <View key={index} style={styles.imagemPreviewWrapper}>
+                    <Image
+                      source={{ uri }}
+                      style={styles.imagemPreview}
+                      resizeMode="cover"
+                    />
+                    <TouchableOpacity
+                      style={styles.removerImagemButton}
+                      onPress={() => removerImagem(index)}
+                    >
+                      <Ionicons name="close-circle" size={24} color="#FF3B30" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
           </ScrollView>
 
           <View style={styles.modalFooter}>
@@ -711,7 +833,7 @@ export const ImoveisScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.saveButton}
-              onPress={handleAdicionarImovel}
+              onPress={salvarImovel}
             >
               <Text style={styles.saveButtonText}>Salvar</Text>
             </TouchableOpacity>
@@ -1055,5 +1177,25 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     color: '#007AFF',
     fontSize: 14,
+  },
+  imagensPreviewContainer: {
+    marginTop: 10,
+  },
+  imagemPreviewWrapper: {
+    position: 'relative',
+    marginRight: 10,
+  },
+  imagemPreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+  },
+  removerImagemButton: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 2,
   },
 }); 
