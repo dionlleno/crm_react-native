@@ -336,624 +336,626 @@ export const ClientesScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Clientes</Text>
-        </View>
-
-        <View style={styles.filtrosContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity 
-              style={[styles.filtroButton, filtroAtivo === 'todos' && styles.filtroButtonAtivo]}
-              onPress={() => {
-                setFiltroAtivo('todos');
-                setTermoBusca('');
-              }}
-            >
-              <Text style={[styles.filtroButtonText, filtroAtivo === 'todos' && styles.filtroButtonTextAtivo]}>
-                Todos
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filtroButton, filtroAtivo === 'nome' && styles.filtroButtonAtivo]}
-              onPress={() => setFiltroAtivo('nome')}
-            >
-              <Text style={[styles.filtroButtonText, filtroAtivo === 'nome' && styles.filtroButtonTextAtivo]}>
-                Nome
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filtroButton, filtroAtivo === 'endereco' && styles.filtroButtonAtivo]}
-              onPress={() => setFiltroAtivo('endereco')}
-            >
-              <Text style={[styles.filtroButtonText, filtroAtivo === 'endereco' && styles.filtroButtonTextAtivo]}>
-                Endereço
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filtroButton, filtroAtivo === 'tags' && styles.filtroButtonAtivo]}
-              onPress={() => setFiltroAtivo('tags')}
-            >
-              <Text style={[styles.filtroButtonText, filtroAtivo === 'tags' && styles.filtroButtonTextAtivo]}>
-                Situação
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-
-        {filtroAtivo !== 'todos' && (
-          <View style={styles.buscaContainer}>
-            <TextInput
-              style={styles.buscaInput}
-              placeholder={
-                filtroAtivo === 'endereco' 
-                  ? 'Buscar por logradouro, cidade, estado ou CEP...'
-                  : `Buscar por ${filtroAtivo}...`
-              }
-              value={termoBusca}
-              onChangeText={setTermoBusca}
-            />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle}>Clientes</Text>
           </View>
-        )}
-
-        <View style={styles.ordenacaoContainer}>
-          <TouchableOpacity 
-            style={[styles.ordenacaoButton, ordemAtiva === 'nome' && styles.ordenacaoButtonAtivo]}
-            onPress={() => {
-              setOrdemAtiva('nome');
-              setOrdemCrescente(ordemAtiva === 'nome' ? !ordemCrescente : true);
-            }}
-          >
-            <Text style={[styles.ordenacaoButtonText, ordemAtiva === 'nome' && styles.ordenacaoButtonTextAtivo]}>
-              Nome {ordemAtiva === 'nome' && (ordemCrescente ? '↑' : '↓')}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.ordenacaoButton, ordemAtiva === 'data' && styles.ordenacaoButtonAtivo]}
-            onPress={() => {
-              setOrdemAtiva('data');
-              setOrdemCrescente(ordemAtiva === 'data' ? !ordemCrescente : true);
-            }}
-          >
-            <Text style={[styles.ordenacaoButtonText, ordemAtiva === 'data' && styles.ordenacaoButtonTextAtivo]}>
-              Data {ordemAtiva === 'data' && (ordemCrescente ? '↑' : '↓')}
-            </Text>
-          </TouchableOpacity>
         </View>
+      </View>
 
-        <ScrollView style={styles.clientesList}>
-          {clientesOrdenados.map((cliente) => (
-            <TouchableOpacity 
-              key={cliente.id} 
-              style={styles.clienteCard}
-              onPress={() => {
-                setClienteSelecionado(cliente);
-                setModalDetalhesVisible(true);
-              }}
-            >
-              <View style={styles.clienteHeader}>
-                <View style={styles.clienteNomeContainer}>
-                  <Text style={styles.clienteNome}>{cliente.nome}</Text>
-                  <View style={styles.clienteContato}>
-                    <Ionicons name="call" size={16} color="#666" />
-                    <Text style={styles.clienteTelefone}>{cliente.telefone}</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={styles.clienteInfo}>
-                <View style={styles.infoRow}>
-                  <Ionicons name="location" size={16} color="#666" />
-                  <Text style={styles.infoText}>
-                    {cliente.endereco.logradouro}, {cliente.endereco.cidade} - {cliente.endereco.estado}
-                  </Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Ionicons name="calendar" size={16} color="#666" />
-                  <Text style={styles.infoText}>Último contato: {cliente.ultimoContato}</Text>
-                </View>
-                {cliente.observacoes && (
-                  <View style={styles.infoRow}>
-                    <Ionicons name="document-text" size={16} color="#666" />
-                    <Text style={styles.infoText}>{cliente.observacoes}</Text>
-                  </View>
-                )}
-                {cliente.tags.length > 0 && (
-                  <View style={styles.tagsContainer}>
-                    {cliente.tags.map((tag) => (
-                      <View key={tag} style={styles.tag}>
-                        <Text style={styles.tagText}>{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
+      <View style={styles.filtrosContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'todos' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('todos')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'todos' && styles.filtroButtonTextAtivo]}>
+              Todos
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'nome' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('nome')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'nome' && styles.filtroButtonTextAtivo]}>
+              Nome
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'endereco' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('endereco')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'endereco' && styles.filtroButtonTextAtivo]}>
+              Endereço
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'tags' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('tags')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'tags' && styles.filtroButtonTextAtivo]}>
+              Situação
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
+      </View>
 
+      {filtroAtivo !== 'todos' && (
+        <View style={styles.buscaContainer}>
+          <TextInput
+            style={styles.buscaInput}
+            placeholder={
+              filtroAtivo === 'endereco' 
+                ? 'Buscar por logradouro, cidade, estado ou CEP...'
+                : `Buscar por ${filtroAtivo}...`
+            }
+            value={termoBusca}
+            onChangeText={setTermoBusca}
+          />
+        </View>
+      )}
+
+      <View style={styles.ordenacaoContainer}>
         <TouchableOpacity 
-          style={styles.floatingButton}
-          onPress={() => setModalVisible(true)}
+          style={[styles.ordenacaoButton, ordemAtiva === 'nome' && styles.ordenacaoButtonAtivo]}
+          onPress={() => {
+            setOrdemAtiva('nome');
+            setOrdemCrescente(ordemAtiva === 'nome' ? !ordemCrescente : true);
+          }}
         >
-          <Ionicons name="add" size={24} color="white" />
+          <Text style={[styles.ordenacaoButtonText, ordemAtiva === 'nome' && styles.ordenacaoButtonTextAtivo]}>
+            Nome {ordemAtiva === 'nome' && (ordemCrescente ? '↑' : '↓')}
+          </Text>
         </TouchableOpacity>
-
-        <Modal
-          isVisible={modalDetalhesVisible}
-          onBackdropPress={() => setModalDetalhesVisible(false)}
-          style={styles.modal}
+        <TouchableOpacity 
+          style={[styles.ordenacaoButton, ordemAtiva === 'data' && styles.ordenacaoButtonAtivo]}
+          onPress={() => {
+            setOrdemAtiva('data');
+            setOrdemCrescente(ordemAtiva === 'data' ? !ordemCrescente : true);
+          }}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes do Cliente</Text>
-              <View style={styles.modalHeaderButtons}>
-                <TouchableOpacity 
-                  style={styles.modalActionButton}
-                  onPress={() => {
-                    setModalDetalhesVisible(false);
-                    setNovoCliente(clienteSelecionado!);
-                    setModalVisible(true);
-                  }}
-                >
-                  <Ionicons name="create" size={24} color="#007AFF" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.modalActionButton}
-                  onPress={() => {
-                    setClientes(clientes.filter(c => c.id !== clienteSelecionado?.id));
-                    setModalDetalhesVisible(false);
-                  }}
-                >
-                  <Ionicons name="trash" size={24} color="#ff3b30" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setModalDetalhesVisible(false)}>
-                  <Ionicons name="close" size={24} color="#666" />
-                </TouchableOpacity>
+          <Text style={[styles.ordenacaoButtonText, ordemAtiva === 'data' && styles.ordenacaoButtonTextAtivo]}>
+            Data {ordemAtiva === 'data' && (ordemCrescente ? '↑' : '↓')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.clientesList}>
+        {clientesOrdenados.map((cliente) => (
+          <TouchableOpacity 
+            key={cliente.id} 
+            style={styles.clienteCard}
+            onPress={() => {
+              setClienteSelecionado(cliente);
+              setModalDetalhesVisible(true);
+            }}
+          >
+            <View style={styles.clienteHeader}>
+              <View style={styles.clienteNomeContainer}>
+                <Text style={styles.clienteNome}>{cliente.nome}</Text>
+                <View style={styles.clienteContato}>
+                  <Ionicons name="call" size={16} color="#666" />
+                  <Text style={styles.clienteTelefone}>{cliente.telefone}</Text>
+                </View>
               </View>
             </View>
+            <View style={styles.clienteInfo}>
+              <View style={styles.infoRow}>
+                <Ionicons name="location" size={16} color="#666" />
+                <Text style={styles.infoText}>
+                  {cliente.endereco.logradouro}, {cliente.endereco.cidade} - {cliente.endereco.estado}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Ionicons name="calendar" size={16} color="#666" />
+                <Text style={styles.infoText}>Último contato: {cliente.ultimoContato}</Text>
+              </View>
+              {cliente.observacoes && (
+                <View style={styles.infoRow}>
+                  <Ionicons name="document-text" size={16} color="#666" />
+                  <Text style={styles.infoText}>{cliente.observacoes}</Text>
+                </View>
+              )}
+              {cliente.tags.length > 0 && (
+                <View style={styles.tagsContainer}>
+                  {cliente.tags.map((tag) => (
+                    <View key={tag} style={styles.tag}>
+                      <Text style={styles.tagText}>{tag}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-            <ScrollView style={styles.modalForm}>
-              {clienteSelecionado && (
-                <>
+      <TouchableOpacity 
+        style={styles.floatingButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Ionicons name="add" size={24} color="white" />
+      </TouchableOpacity>
+
+      <Modal
+        isVisible={modalDetalhesVisible}
+        onBackdropPress={() => setModalDetalhesVisible(false)}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Detalhes do Cliente</Text>
+            <View style={styles.modalHeaderButtons}>
+              <TouchableOpacity 
+                style={styles.modalActionButton}
+                onPress={() => {
+                  setModalDetalhesVisible(false);
+                  setNovoCliente(clienteSelecionado!);
+                  setModalVisible(true);
+                }}
+              >
+                <Ionicons name="create" size={24} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.modalActionButton}
+                onPress={() => {
+                  setClientes(clientes.filter(c => c.id !== clienteSelecionado?.id));
+                  setModalDetalhesVisible(false);
+                }}
+              >
+                <Ionicons name="trash" size={24} color="#ff3b30" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalDetalhesVisible(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <ScrollView style={styles.modalForm}>
+            {clienteSelecionado && (
+              <>
+                <View style={styles.detalheContainer}>
+                  <Text style={styles.detalheLabel}>Nome</Text>
+                  <Text style={styles.detalheValor}>{clienteSelecionado.nome}</Text>
+                </View>
+
+                <View style={styles.detalheContainer}>
+                  <Text style={styles.detalheLabel}>Email</Text>
+                  <Text style={styles.detalheValor}>{clienteSelecionado.email}</Text>
+                </View>
+
+                <View style={styles.detalheContainer}>
+                  <Text style={styles.detalheLabel}>Telefone</Text>
+                  <Text style={styles.detalheValor}>{clienteSelecionado.telefone}</Text>
+                </View>
+
+                <View style={styles.detalheContainer}>
+                  <Text style={styles.detalheLabel}>Endereço</Text>
+                  <Text style={styles.detalheValor}>{clienteSelecionado.endereco.logradouro}</Text>
+                  <Text style={styles.detalheValor}>
+                    {clienteSelecionado.endereco.cidade} - {clienteSelecionado.endereco.estado}
+                  </Text>
+                  <Text style={styles.detalheValor}>{clienteSelecionado.endereco.pais}</Text>
+                  <Text style={styles.detalheValor}>CEP: {clienteSelecionado.endereco.cep}</Text>
+                </View>
+
+                <View style={styles.detalheContainer}>
+                  <Text style={styles.detalheLabel}>Observações</Text>
+                  <Text style={styles.detalheValor}>{clienteSelecionado.observacoes}</Text>
+                </View>
+
+                <View style={styles.detalheContainer}>
+                  <Text style={styles.detalheLabel}>Último Contato</Text>
+                  <Text style={styles.detalheValor}>{clienteSelecionado.ultimoContato}</Text>
+                </View>
+
+                {clienteSelecionado.tags.length > 0 && (
                   <View style={styles.detalheContainer}>
-                    <Text style={styles.detalheLabel}>Nome</Text>
-                    <Text style={styles.detalheValor}>{clienteSelecionado.nome}</Text>
+                    <Text style={styles.detalheLabel}>Situação</Text>
+                    <View style={styles.tagsSelectorContainer}>
+                      {clienteSelecionado.tags.map((tag) => (
+                        <TouchableOpacity
+                          key={tag}
+                          style={[
+                            styles.tagSelector,
+                            clienteSelecionado.tags.includes(tag) && styles.tagSelectorActive
+                          ]}
+                          onPress={() => {
+                            setClienteSelecionado(prev => {
+                              if (!prev) return null;
+                              const newTags = prev.tags.filter(t => t !== tag);
+                              return { ...prev, tags: newTags };
+                            });
+                          }}
+                        >
+                          <Text style={[
+                            styles.tagSelectorText,
+                            clienteSelecionado.tags.includes(tag) && styles.tagSelectorTextActive
+                          ]}>
+                            {tag}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
                   </View>
+                )}
 
-                  <View style={styles.detalheContainer}>
-                    <Text style={styles.detalheLabel}>Email</Text>
-                    <Text style={styles.detalheValor}>{clienteSelecionado.email}</Text>
+                <View style={styles.historicoContainer}>
+                  <View style={styles.historicoHeader}>
+                    <Text style={styles.historicoTitle}>Histórico de Interações</Text>
+                    <TouchableOpacity 
+                      style={styles.adicionarNotaButton}
+                      onPress={() => {
+                        setNotaEditavel(null);
+                        setNovaNota({
+                          tipo: 'visita',
+                          descricao: ''
+                        });
+                        setModalNotaVisible(true);
+                      }}
+                    >
+                      <Ionicons name="add" size={24} color="#007AFF" />
+                    </TouchableOpacity>
                   </View>
-
-                  <View style={styles.detalheContainer}>
-                    <Text style={styles.detalheLabel}>Telefone</Text>
-                    <Text style={styles.detalheValor}>{clienteSelecionado.telefone}</Text>
-                  </View>
-
-                  <View style={styles.detalheContainer}>
-                    <Text style={styles.detalheLabel}>Endereço</Text>
-                    <Text style={styles.detalheValor}>{clienteSelecionado.endereco.logradouro}</Text>
-                    <Text style={styles.detalheValor}>
-                      {clienteSelecionado.endereco.cidade} - {clienteSelecionado.endereco.estado}
-                    </Text>
-                    <Text style={styles.detalheValor}>{clienteSelecionado.endereco.pais}</Text>
-                    <Text style={styles.detalheValor}>CEP: {clienteSelecionado.endereco.cep}</Text>
-                  </View>
-
-                  <View style={styles.detalheContainer}>
-                    <Text style={styles.detalheLabel}>Observações</Text>
-                    <Text style={styles.detalheValor}>{clienteSelecionado.observacoes}</Text>
-                  </View>
-
-                  <View style={styles.detalheContainer}>
-                    <Text style={styles.detalheLabel}>Último Contato</Text>
-                    <Text style={styles.detalheValor}>{clienteSelecionado.ultimoContato}</Text>
-                  </View>
-
-                  {clienteSelecionado.tags.length > 0 && (
-                    <View style={styles.detalheContainer}>
-                      <Text style={styles.detalheLabel}>Situação</Text>
-                      <View style={styles.tagsSelectorContainer}>
-                        {clienteSelecionado.tags.map((tag) => (
-                          <TouchableOpacity
-                            key={tag}
-                            style={[
-                              styles.tagSelector,
-                              clienteSelecionado.tags.includes(tag) && styles.tagSelectorActive
-                            ]}
+                  {historicoCliente.map((item) => (
+                    <View key={item.id} style={styles.historicoItem}>
+                      <View style={styles.historicoHeader}>
+                        <View style={styles.historicoDataContainer}>
+                          <Ionicons 
+                            name={
+                              item.tipo === 'visita' ? 'walk' :
+                              item.tipo === 'ligacao' ? 'call' :
+                              item.tipo === 'email' ? 'mail' : 'document'
+                            } 
+                            size={16} 
+                            color="#666" 
+                          />
+                          <Text style={styles.historicoData}>{item.data}</Text>
+                        </View>
+                        <View style={styles.historicoAcoes}>
+                          <TouchableOpacity 
+                            style={styles.acaoButton}
                             onPress={() => {
-                              setClienteSelecionado(prev => {
-                                if (!prev) return null;
-                                const newTags = prev.tags.filter(t => t !== tag);
-                                return { ...prev, tags: newTags };
+                              setNotaEditavel(item);
+                              setNovaNota({
+                                tipo: item.tipo,
+                                descricao: item.descricao
                               });
+                              setModalNotaVisible(true);
                             }}
                           >
-                            <Text style={[
-                              styles.tagSelectorText,
-                              clienteSelecionado.tags.includes(tag) && styles.tagSelectorTextActive
-                            ]}>
-                              {tag}
-                            </Text>
+                            <Ionicons name="create" size={16} color="#666" />
                           </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
-                  )}
-
-                  <View style={styles.historicoContainer}>
-                    <View style={styles.historicoHeader}>
-                      <Text style={styles.historicoTitle}>Histórico de Interações</Text>
-                      <TouchableOpacity 
-                        style={styles.adicionarNotaButton}
-                        onPress={() => {
-                          setNotaEditavel(null);
-                          setNovaNota({
-                            tipo: 'visita',
-                            descricao: ''
-                          });
-                          setModalNotaVisible(true);
-                        }}
-                      >
-                        <Ionicons name="add" size={24} color="#007AFF" />
-                      </TouchableOpacity>
-                    </View>
-                    {historicoCliente.map((item) => (
-                      <View key={item.id} style={styles.historicoItem}>
-                        <View style={styles.historicoHeader}>
-                          <View style={styles.historicoDataContainer}>
-                            <Ionicons 
-                              name={
-                                item.tipo === 'visita' ? 'walk' :
-                                item.tipo === 'ligacao' ? 'call' :
-                                item.tipo === 'email' ? 'mail' : 'document'
-                              } 
-                              size={16} 
-                              color="#666" 
-                            />
-                            <Text style={styles.historicoData}>{item.data}</Text>
-                          </View>
-                          <View style={styles.historicoAcoes}>
-                            <TouchableOpacity 
-                              style={styles.acaoButton}
-                              onPress={() => {
-                                setNotaEditavel(item);
-                                setNovaNota({
-                                  tipo: item.tipo,
-                                  descricao: item.descricao
-                                });
-                                setModalNotaVisible(true);
-                              }}
-                            >
-                              <Ionicons name="create" size={16} color="#666" />
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                              style={styles.acaoButton}
-                              onPress={() => handleRemoverNota(item.id)}
-                            >
-                              <Ionicons name="trash" size={16} color="#ff3b30" />
-                            </TouchableOpacity>
-                          </View>
-                        </View>
-                        <View style={styles.historicoContent}>
-                          <Text style={styles.historicoDescricao}>{item.descricao}</Text>
+                          <TouchableOpacity 
+                            style={styles.acaoButton}
+                            onPress={() => handleRemoverNota(item.id)}
+                          >
+                            <Ionicons name="trash" size={16} color="#ff3b30" />
+                          </TouchableOpacity>
                         </View>
                       </View>
-                    ))}
-                  </View>
-                </>
-              )}
-            </ScrollView>
-          </View>
-        </Modal>
-
-        <Modal
-          isVisible={modalVisible}
-          onBackdropPress={() => {
-            setModalVisible(false);
-            setErroValidacao({});
-          }}
-          style={styles.modal}
-        >
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.modalContent}
-          >
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Novo Cliente</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView 
-              style={styles.modalForm}
-              keyboardShouldPersistTaps="handled"
-            >
-              {Object.values(erroValidacao).map((error) => (
-                <View key={error} style={styles.erroContainer}>
-                  <Text style={styles.erroText}>{error}</Text>
-                </View>
-              ))}
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Nome *</Text>
-                <TextInput
-                  style={[styles.input, erroValidacao.nome && styles.inputError]}
-                  value={novoCliente.nome}
-                  onChangeText={(text) => setNovoCliente({...novoCliente, nome: text})}
-                  placeholder="Nome completo"
-                  accessibilityLabel="Campo de nome do cliente"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Email *</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCliente.email}
-                  onChangeText={(text) => setNovoCliente({...novoCliente, email: text})}
-                  placeholder="email@exemplo.com"
-                  keyboardType="email-address"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Telefone *</Text>
-                <TextInput
-                  style={[styles.input, erroValidacao.telefone && styles.inputError]}
-                  value={novoCliente.telefone}
-                  onChangeText={(text) => {
-                    const formatado = formatarTelefone(text);
-                    setNovoCliente({...novoCliente, telefone: formatado});
-                  }}
-                  placeholder="(00) 00000-0000"
-                  keyboardType="numeric"
-                  maxLength={15}
-                  accessibilityLabel="Campo de telefone do cliente"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Endereço</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCliente.endereco.logradouro}
-                  onChangeText={(text) => setNovoCliente({
-                    ...novoCliente,
-                    endereco: { ...novoCliente.endereco, logradouro: text }
-                  })}
-                  placeholder="Logradouro"
-                />
-                <TextInput
-                  style={styles.input}
-                  value={novoCliente.endereco.cidade}
-                  onChangeText={(text) => setNovoCliente({
-                    ...novoCliente,
-                    endereco: { ...novoCliente.endereco, cidade: text }
-                  })}
-                  placeholder="Cidade"
-                />
-                <TextInput
-                  style={styles.input}
-                  value={novoCliente.endereco.estado}
-                  onChangeText={(text) => setNovoCliente({
-                    ...novoCliente,
-                    endereco: { ...novoCliente.endereco, estado: text }
-                  })}
-                  placeholder="Estado"
-                />
-                <TextInput
-                  style={styles.input}
-                  value={novoCliente.endereco.pais}
-                  onChangeText={(text) => setNovoCliente({
-                    ...novoCliente,
-                    endereco: { ...novoCliente.endereco, pais: text }
-                  })}
-                  placeholder="País"
-                />
-                <TextInput
-                  style={styles.input}
-                  value={novoCliente.endereco.cep}
-                  onChangeText={(text) => {
-                    const formatado = formatarCEP(text);
-                    setNovoCliente({
-                      ...novoCliente,
-                      endereco: { ...novoCliente.endereco, cep: formatado }
-                    });
-                  }}
-                  placeholder="CEP"
-                  keyboardType="numeric"
-                  maxLength={9}
-                  accessibilityLabel="Campo de CEP do cliente"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Observações</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={novoCliente.observacoes}
-                  onChangeText={(text) => setNovoCliente({...novoCliente, observacoes: text})}
-                  placeholder="Observações sobre o cliente"
-                  multiline
-                  numberOfLines={4}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Último Contato *</Text>
-                <TextInput
-                  style={[styles.input, erroValidacao.data && styles.inputError]}
-                  value={novoCliente.ultimoContato}
-                  onChangeText={(text) => setNovoCliente({...novoCliente, ultimoContato: text})}
-                  placeholder="DD/MM/AAAA"
-                  keyboardType="numeric"
-                  maxLength={10}
-                  accessibilityLabel="Campo de data do último contato"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Situação</Text>
-                <View style={styles.tagsSelectorContainer}>
-                  {tagsDisponiveis.map((tag) => (
-                    <TouchableOpacity
-                      key={tag}
-                      style={[
-                        styles.tagSelector,
-                        novoCliente.tags.includes(tag) && styles.tagSelectorActive
-                      ]}
-                      onPress={() => toggleTag(tag)}
-                    >
-                      <Text style={[
-                        styles.tagSelectorText,
-                        novoCliente.tags.includes(tag) && styles.tagSelectorTextActive
-                      ]}>
-                        {tag}
-                      </Text>
-                    </TouchableOpacity>
+                      <View style={styles.historicoContent}>
+                        <Text style={styles.historicoDescricao}>{item.descricao}</Text>
+                      </View>
+                    </View>
                   ))}
                 </View>
-              </View>
-            </ScrollView>
+              </>
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
 
-            <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={styles.cancelButton}
-                onPress={() => {
-                  setModalVisible(false);
-                  setErroValidacao({});
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.saveButton}
-                onPress={handleAdicionarCliente}
-              >
-                <Text style={styles.saveButtonText}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
-        </Modal>
-
-        <Modal
-          isVisible={modalNotaVisible}
-          onBackdropPress={() => {
-            setModalNotaVisible(false);
-            setNotaEditavel(null);
-          }}
-          style={styles.modal}
+      <Modal
+        isVisible={modalVisible}
+        onBackdropPress={() => {
+          setModalVisible(false);
+          setErroValidacao({});
+        }}
+        style={styles.modal}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalContent}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {notaEditavel ? 'Editar Nota' : 'Nova Nota'}
-              </Text>
-              <TouchableOpacity onPress={() => {
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Novo Cliente</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView 
+            style={styles.modalForm}
+            keyboardShouldPersistTaps="handled"
+          >
+            {Object.values(erroValidacao).map((error) => (
+              <View key={error} style={styles.erroContainer}>
+                <Text style={styles.erroText}>{error}</Text>
+              </View>
+            ))}
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Nome *</Text>
+              <TextInput
+                style={[styles.input, erroValidacao.nome && styles.inputError]}
+                value={novoCliente.nome}
+                onChangeText={(text) => setNovoCliente({...novoCliente, nome: text})}
+                placeholder="Nome completo"
+                accessibilityLabel="Campo de nome do cliente"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email *</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCliente.email}
+                onChangeText={(text) => setNovoCliente({...novoCliente, email: text})}
+                placeholder="email@exemplo.com"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Telefone *</Text>
+              <TextInput
+                style={[styles.input, erroValidacao.telefone && styles.inputError]}
+                value={novoCliente.telefone}
+                onChangeText={(text) => {
+                  const formatado = formatarTelefone(text);
+                  setNovoCliente({...novoCliente, telefone: formatado});
+                }}
+                placeholder="(00) 00000-0000"
+                keyboardType="numeric"
+                maxLength={15}
+                accessibilityLabel="Campo de telefone do cliente"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Endereço</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCliente.endereco.logradouro}
+                onChangeText={(text) => setNovoCliente({
+                  ...novoCliente,
+                  endereco: { ...novoCliente.endereco, logradouro: text }
+                })}
+                placeholder="Logradouro"
+              />
+              <TextInput
+                style={styles.input}
+                value={novoCliente.endereco.cidade}
+                onChangeText={(text) => setNovoCliente({
+                  ...novoCliente,
+                  endereco: { ...novoCliente.endereco, cidade: text }
+                })}
+                placeholder="Cidade"
+              />
+              <TextInput
+                style={styles.input}
+                value={novoCliente.endereco.estado}
+                onChangeText={(text) => setNovoCliente({
+                  ...novoCliente,
+                  endereco: { ...novoCliente.endereco, estado: text }
+                })}
+                placeholder="Estado"
+              />
+              <TextInput
+                style={styles.input}
+                value={novoCliente.endereco.pais}
+                onChangeText={(text) => setNovoCliente({
+                  ...novoCliente,
+                  endereco: { ...novoCliente.endereco, pais: text }
+                })}
+                placeholder="País"
+              />
+              <TextInput
+                style={styles.input}
+                value={novoCliente.endereco.cep}
+                onChangeText={(text) => {
+                  const formatado = formatarCEP(text);
+                  setNovoCliente({
+                    ...novoCliente,
+                    endereco: { ...novoCliente.endereco, cep: formatado }
+                  });
+                }}
+                placeholder="CEP"
+                keyboardType="numeric"
+                maxLength={9}
+                accessibilityLabel="Campo de CEP do cliente"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Observações</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={novoCliente.observacoes}
+                onChangeText={(text) => setNovoCliente({...novoCliente, observacoes: text})}
+                placeholder="Observações sobre o cliente"
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Último Contato *</Text>
+              <TextInput
+                style={[styles.input, erroValidacao.data && styles.inputError]}
+                value={novoCliente.ultimoContato}
+                onChangeText={(text) => setNovoCliente({...novoCliente, ultimoContato: text})}
+                placeholder="DD/MM/AAAA"
+                keyboardType="numeric"
+                maxLength={10}
+                accessibilityLabel="Campo de data do último contato"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Situação</Text>
+              <View style={styles.tagsSelectorContainer}>
+                {tagsDisponiveis.map((tag) => (
+                  <TouchableOpacity
+                    key={tag}
+                    style={[
+                      styles.tagSelector,
+                      novoCliente.tags.includes(tag) && styles.tagSelectorActive
+                    ]}
+                    onPress={() => toggleTag(tag)}
+                  >
+                    <Text style={[
+                      styles.tagSelectorText,
+                      novoCliente.tags.includes(tag) && styles.tagSelectorTextActive
+                    ]}>
+                      {tag}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={() => {
+                setModalVisible(false);
+                setErroValidacao({});
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.saveButton}
+              onPress={handleAdicionarCliente}
+            >
+              <Text style={styles.saveButtonText}>Salvar</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal
+        isVisible={modalNotaVisible}
+        onBackdropPress={() => {
+          setModalNotaVisible(false);
+          setNotaEditavel(null);
+        }}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>
+              {notaEditavel ? 'Editar Nota' : 'Nova Nota'}
+            </Text>
+            <TouchableOpacity onPress={() => {
+              setModalNotaVisible(false);
+              setNotaEditavel(null);
+            }}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalForm}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Tipo</Text>
+              <View style={styles.tipoContainer}>
+                {(['visita', 'ligacao', 'email', 'documento'] as const).map((tipo) => (
+                  <TouchableOpacity
+                    key={tipo}
+                    style={[
+                      styles.tipoButton,
+                      novaNota.tipo === tipo && styles.tipoButtonAtivo
+                    ]}
+                    onPress={() => setNovaNota({...novaNota, tipo})}
+                  >
+                    <Ionicons 
+                      name={
+                        tipo === 'visita' ? 'walk' :
+                        tipo === 'ligacao' ? 'call' :
+                        tipo === 'email' ? 'mail' : 'document'
+                      } 
+                      size={16} 
+                      color={novaNota.tipo === tipo ? 'white' : '#666'} 
+                    />
+                    <Text style={[
+                      styles.tipoButtonText,
+                      novaNota.tipo === tipo && styles.tipoButtonTextAtivo
+                    ]}>
+                      {tipo === 'visita' ? 'Visita' :
+                       tipo === 'ligacao' ? 'Ligação' :
+                       tipo === 'email' ? 'Email' : 'Documento'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Descrição</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={novaNota.descricao}
+                onChangeText={(text) => setNovaNota({...novaNota, descricao: text})}
+                placeholder="Descreva a interação..."
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={() => {
                 setModalNotaVisible(false);
                 setNotaEditavel(null);
-              }}>
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalForm}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Tipo</Text>
-                <View style={styles.tipoContainer}>
-                  {(['visita', 'ligacao', 'email', 'documento'] as const).map((tipo) => (
-                    <TouchableOpacity
-                      key={tipo}
-                      style={[
-                        styles.tipoButton,
-                        novaNota.tipo === tipo && styles.tipoButtonAtivo
-                      ]}
-                      onPress={() => setNovaNota({...novaNota, tipo})}
-                    >
-                      <Ionicons 
-                        name={
-                          tipo === 'visita' ? 'walk' :
-                          tipo === 'ligacao' ? 'call' :
-                          tipo === 'email' ? 'mail' : 'document'
-                        } 
-                        size={16} 
-                        color={novaNota.tipo === tipo ? 'white' : '#666'} 
-                      />
-                      <Text style={[
-                        styles.tipoButtonText,
-                        novaNota.tipo === tipo && styles.tipoButtonTextAtivo
-                      ]}>
-                        {tipo === 'visita' ? 'Visita' :
-                         tipo === 'ligacao' ? 'Ligação' :
-                         tipo === 'email' ? 'Email' : 'Documento'}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Descrição</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={novaNota.descricao}
-                  onChangeText={(text) => setNovaNota({...novaNota, descricao: text})}
-                  placeholder="Descreva a interação..."
-                  multiline
-                  numberOfLines={4}
-                />
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={styles.cancelButton}
-                onPress={() => {
-                  setModalNotaVisible(false);
-                  setNotaEditavel(null);
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.saveButton}
-                onPress={notaEditavel ? handleEditarNota : handleAdicionarNota}
-              >
-                <Text style={styles.saveButtonText}>
-                  {notaEditavel ? 'Salvar' : 'Adicionar'}
-                </Text>
-              </TouchableOpacity>
-            </View>
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.saveButton}
+              onPress={notaEditavel ? handleEditarNota : handleAdicionarNota}
+            >
+              <Text style={styles.saveButtonText}>
+                {notaEditavel ? 'Salvar' : 'Adicionar'}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      </View>
-    </SafeAreaView>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    paddingTop: Platform.OS === 'android' ? 50 : 20,
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    height: 60,
   },
-  title: {
+  headerContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerLeft: {
+    alignItems: 'center',
+  },
+  headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',

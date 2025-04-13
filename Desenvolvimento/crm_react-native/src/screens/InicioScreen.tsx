@@ -139,6 +139,7 @@ export const InicioScreen = () => {
     anotacao: '',
   });
   const [erroValidacao, setErroValidacao] = useState<string | null>(null);
+  const [filtroAtivo, setFiltroAtivo] = useState<'todos' | 'hoje' | 'amanha' | 'semana' | 'mes'>('todos');
 
   const validarCampos = (compromisso: Partial<Compromisso>) => {
     if (!compromisso.titulo?.trim()) return 'O título é obrigatório';
@@ -210,18 +211,32 @@ export const InicioScreen = () => {
   };
 
   const getCompromissos = () => {
-    if (dataSelecionada === 'todos') {
-      return compromissos;
-    }
-
     const hoje = new Date();
-    const dataFiltro = dataSelecionada === 'ontem' 
-      ? format(addDays(hoje, -1), 'dd/MM/yyyy')
-      : dataSelecionada === 'amanha'
-      ? format(addDays(hoje, 1), 'dd/MM/yyyy')
-      : format(hoje, 'dd/MM/yyyy');
+    const amanha = new Date(hoje);
+    amanha.setDate(amanha.getDate() + 1);
+    const inicioSemana = new Date(hoje);
+    inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(inicioSemana.getDate() + 6);
+    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-    return compromissos.filter(compromisso => compromisso.data === dataFiltro);
+    return compromissos.filter(compromisso => {
+      const dataCompromisso = parse(compromisso.data, 'dd/MM/yyyy', new Date());
+      
+      switch (filtroAtivo) {
+        case 'hoje':
+          return format(dataCompromisso, 'dd/MM/yyyy') === format(hoje, 'dd/MM/yyyy');
+        case 'amanha':
+          return format(dataCompromisso, 'dd/MM/yyyy') === format(amanha, 'dd/MM/yyyy');
+        case 'semana':
+          return dataCompromisso >= inicioSemana && dataCompromisso <= fimSemana;
+        case 'mes':
+          return dataCompromisso >= inicioMes && dataCompromisso <= fimMes;
+        default:
+          return true;
+      }
+    });
   };
 
   const formatarData = (data: Date) => {
@@ -231,437 +246,455 @@ export const InicioScreen = () => {
     return format(data, "EEEE, d 'de' MMMM", { locale: ptBR });
   };
 
+  const compromissosFiltrados = getCompromissos();
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Compromissos</Text>
-          <View style={styles.selectorContainer}>
-            <TouchableOpacity
-              style={[styles.selectorButton, dataSelecionada === 'ontem' && styles.selectorButtonActive]}
-              onPress={() => setDataSelecionada('ontem')}
-            >
-              <Text style={[styles.selectorText, dataSelecionada === 'ontem' && styles.selectorTextActive]}>
-                Ontem
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.selectorButton, dataSelecionada === 'hoje' && styles.selectorButtonActive]}
-              onPress={() => setDataSelecionada('hoje')}
-            >
-              <Text style={[styles.selectorText, dataSelecionada === 'hoje' && styles.selectorTextActive]}>
-                Hoje
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.selectorButton, dataSelecionada === 'amanha' && styles.selectorButtonActive]}
-              onPress={() => setDataSelecionada('amanha')}
-            >
-              <Text style={[styles.selectorText, dataSelecionada === 'amanha' && styles.selectorTextActive]}>
-                Amanhã
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.selectorButton, dataSelecionada === 'todos' && styles.selectorButtonActive]}
-              onPress={() => setDataSelecionada('todos')}
-            >
-              <Text style={[styles.selectorText, dataSelecionada === 'todos' && styles.selectorTextActive]}>
-                Todos
-              </Text>
-            </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle}>Compromissos</Text>
           </View>
         </View>
+      </View>
 
-        <ScrollView style={styles.listaContainer}>
-          {getCompromissos().map((compromisso) => (
-            <TouchableOpacity
-              key={compromisso.id}
-              style={styles.compromissoCard}
-              onPress={() => {
-                setCompromissoSelecionado(compromisso);
-                setModalDetalhesVisible(true);
-              }}
-            >
-              <View style={styles.compromissoHeader}>
-                <Text style={styles.compromissoTitulo}>{compromisso.titulo}</Text>
-                <View style={styles.compromissoHorarioContainer}>
-                  <Text style={styles.compromissoData}>{compromisso.data}</Text>
-                  <Text style={styles.compromissoHorario}>{compromisso.horario}</Text>
-                </View>
-              </View>
-              <View style={styles.tagsContainer}>
-                {compromisso.tags.map((tag, index) => (
-                  <View key={index} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
-                  </View>
-                ))}
-              </View>
-              <Text style={styles.compromissoLocal}>{compromisso.local}</Text>
-              {compromisso.anotacao && (
-                <Text style={styles.compromissoAnotacao} numberOfLines={2}>
-                  {compromisso.anotacao}
-                </Text>
-              )}
-            </TouchableOpacity>
-          ))}
+      <View style={styles.filtrosContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'todos' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('todos')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'todos' && styles.filtroButtonTextAtivo]}>
+              Todos
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'hoje' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('hoje')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'hoje' && styles.filtroButtonTextAtivo]}>
+              Hoje
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'amanha' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('amanha')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'amanha' && styles.filtroButtonTextAtivo]}>
+              Amanhã
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'semana' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('semana')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'semana' && styles.filtroButtonTextAtivo]}>
+              Esta Semana
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filtroButton, filtroAtivo === 'mes' && styles.filtroButtonAtivo]}
+            onPress={() => setFiltroAtivo('mes')}
+          >
+            <Text style={[styles.filtroButtonText, filtroAtivo === 'mes' && styles.filtroButtonTextAtivo]}>
+              Este Mês
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
+      </View>
 
-        <TouchableOpacity 
-          style={styles.floatingButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Ionicons name="add" size={24} color="white" />
-        </TouchableOpacity>
-
-        <Modal
-          isVisible={modalDetalhesVisible}
-          onBackdropPress={() => setModalDetalhesVisible(false)}
-          style={styles.modal}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Detalhes do Compromisso</Text>
-              <View style={styles.modalHeaderButtons}>
-                <TouchableOpacity 
-                  style={styles.modalActionButton}
-                  onPress={() => {
-                    setModalDetalhesVisible(false);
-                    setNovoCompromisso({
-                      titulo: compromissoSelecionado?.titulo || '',
-                      horario: compromissoSelecionado?.horario || '',
-                      local: compromissoSelecionado?.local || '',
-                      data: compromissoSelecionado?.data || '',
-                      tags: compromissoSelecionado?.tags || [],
-                      cliente: compromissoSelecionado?.cliente || '',
-                      imovel: compromissoSelecionado?.imovel || '',
-                      anotacao: compromissoSelecionado?.anotacao || ''
-                    });
-                    setModalVisible(true);
-                  }}
-                >
-                  <Ionicons name="create" size={24} color="#007AFF" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.modalActionButton}
-                  onPress={() => {
-                    setCompromissos(compromissos.filter(c => c.id !== compromissoSelecionado?.id));
-                    setModalDetalhesVisible(false);
-                  }}
-                >
-                  <Ionicons name="trash" size={24} color="#ff3b30" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setModalDetalhesVisible(false)}>
-                  <Ionicons name="close" size={24} color="#666" />
-                </TouchableOpacity>
+      <ScrollView style={styles.listaContainer}>
+        {compromissosFiltrados.map((compromisso) => (
+          <TouchableOpacity
+            key={compromisso.id}
+            style={styles.compromissoCard}
+            onPress={() => {
+              setCompromissoSelecionado(compromisso);
+              setModalDetalhesVisible(true);
+            }}
+          >
+            <View style={styles.compromissoHeader}>
+              <Text style={styles.compromissoTitulo}>{compromisso.titulo}</Text>
+              <View style={styles.compromissoHorarioContainer}>
+                <Text style={styles.compromissoData}>{compromisso.data}</Text>
+                <Text style={styles.compromissoHorario}>{compromisso.horario}</Text>
               </View>
             </View>
-
-            <ScrollView style={styles.modalForm}>
-              {erroValidacao && (
-                <View style={styles.erroContainer}>
-                  <Text style={styles.erroText}>{erroValidacao}</Text>
+            <View style={styles.tagsContainer}>
+              {compromisso.tags.map((tag, index) => (
+                <View key={index} style={styles.tag}>
+                  <Text style={styles.tagText}>{tag}</Text>
                 </View>
-              )}
+              ))}
+            </View>
+            <Text style={styles.compromissoLocal}>{compromisso.local}</Text>
+            {compromisso.anotacao && (
+              <Text style={styles.compromissoAnotacao} numberOfLines={2}>
+                {compromisso.anotacao}
+              </Text>
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Título</Text>
-                <TextInput
-                  style={styles.input}
-                  value={compromissoSelecionado?.titulo}
-                  onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, titulo: text} : null)}
-                />
-              </View>
+      <TouchableOpacity 
+        style={styles.floatingButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Ionicons name="add" size={24} color="white" />
+      </TouchableOpacity>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Data</Text>
-                <TextInput
-                  style={styles.input}
-                  value={compromissoSelecionado?.data}
-                  onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, data: text} : null)}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Horário</Text>
-                <TextInput
-                  style={styles.input}
-                  value={compromissoSelecionado?.horario}
-                  onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, horario: text} : null)}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Local</Text>
-                <TextInput
-                  style={styles.input}
-                  value={compromissoSelecionado?.local}
-                  onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, local: text} : null)}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Anotação</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={compromissoSelecionado?.anotacao}
-                  onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, anotacao: text} : null)}
-                  multiline
-                  numberOfLines={4}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Cliente</Text>
-                <TextInput
-                  style={styles.input}
-                  value={compromissoSelecionado?.cliente}
-                  onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, cliente: text} : null)}
-                  placeholder="Digite o nome do cliente"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Imóvel</Text>
-                <TextInput
-                  style={styles.input}
-                  value={compromissoSelecionado?.imovel}
-                  onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, imovel: text} : null)}
-                  placeholder="Digite o tipo e endereço do imóvel"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Tags</Text>
-                <View style={styles.tagsSelectorContainer}>
-                  {tagsDisponiveis.map((tag) => (
-                    <TouchableOpacity
-                      key={tag}
-                      style={[
-                        styles.tagSelector,
-                        compromissoSelecionado?.tags.includes(tag) && styles.tagSelectorActive
-                      ]}
-                      onPress={() => {
-                        setCompromissoSelecionado(prev => {
-                          if (!prev) return null;
-                          const newTags = prev.tags.includes(tag)
-                            ? prev.tags.filter(t => t !== tag)
-                            : [...prev.tags, tag];
-                          return { ...prev, tags: newTags };
-                        });
-                      }}
-                    >
-                      <Text style={[
-                        styles.tagSelectorText,
-                        compromissoSelecionado?.tags.includes(tag) && styles.tagSelectorTextActive
-                      ]}>
-                        {tag}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-        </Modal>
-
-        <Modal
-          isVisible={modalVisible}
-          onBackdropPress={() => {
-            setModalVisible(false);
-            setErroValidacao(null);
-          }}
-          style={styles.modal}
-        >
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.modalContent}
-          >
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Novo Compromisso</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+      <Modal
+        isVisible={modalDetalhesVisible}
+        onBackdropPress={() => setModalDetalhesVisible(false)}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Detalhes do Compromisso</Text>
+            <View style={styles.modalHeaderButtons}>
+              <TouchableOpacity 
+                style={styles.modalActionButton}
+                onPress={() => {
+                  setModalDetalhesVisible(false);
+                  setNovoCompromisso({
+                    titulo: compromissoSelecionado?.titulo || '',
+                    horario: compromissoSelecionado?.horario || '',
+                    local: compromissoSelecionado?.local || '',
+                    data: compromissoSelecionado?.data || '',
+                    tags: compromissoSelecionado?.tags || [],
+                    cliente: compromissoSelecionado?.cliente || '',
+                    imovel: compromissoSelecionado?.imovel || '',
+                    anotacao: compromissoSelecionado?.anotacao || ''
+                  });
+                  setModalVisible(true);
+                }}
+              >
+                <Ionicons name="create" size={24} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.modalActionButton}
+                onPress={() => {
+                  setCompromissos(compromissos.filter(c => c.id !== compromissoSelecionado?.id));
+                  setModalDetalhesVisible(false);
+                }}
+              >
+                <Ionicons name="trash" size={24} color="#ff3b30" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalDetalhesVisible(false)}>
                 <Ionicons name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
+          </View>
 
-            <ScrollView 
-              style={styles.modalForm}
-              keyboardShouldPersistTaps="handled"
-            >
-              {erroValidacao && (
-                <View style={styles.erroContainer}>
-                  <Text style={styles.erroText}>{erroValidacao}</Text>
-                </View>
-              )}
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Data</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCompromisso.data}
-                  onChangeText={(text) => setNovoCompromisso({...novoCompromisso, data: text})}
-                  placeholder="Ex: 15/04/2024"
-                />
+          <ScrollView style={styles.modalForm}>
+            {erroValidacao && (
+              <View style={styles.erroContainer}>
+                <Text style={styles.erroText}>{erroValidacao}</Text>
               </View>
+            )}
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Horário</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCompromisso.horario}
-                  onChangeText={(text) => setNovoCompromisso({...novoCompromisso, horario: text})}
-                  placeholder="Ex: 14:00"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Título</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCompromisso.titulo}
-                  onChangeText={(text) => setNovoCompromisso({...novoCompromisso, titulo: text})}
-                  placeholder="Digite o título do compromisso"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Local</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCompromisso.local}
-                  onChangeText={(text) => setNovoCompromisso({...novoCompromisso, local: text})}
-                  placeholder="Digite o local do compromisso"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Anotação</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={novoCompromisso.anotacao}
-                  onChangeText={(text) => setNovoCompromisso({...novoCompromisso, anotacao: text})}
-                  placeholder="Digite uma anotação (opcional)"
-                  multiline
-                  numberOfLines={4}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Cliente</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCompromisso.cliente}
-                  onChangeText={(text) => setNovoCompromisso({...novoCompromisso, cliente: text})}
-                  placeholder="Digite o nome do cliente"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Imóvel</Text>
-                <TextInput
-                  style={styles.input}
-                  value={novoCompromisso.imovel}
-                  onChangeText={(text) => setNovoCompromisso({...novoCompromisso, imovel: text})}
-                  placeholder="Digite o tipo e endereço do imóvel"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Tags</Text>
-                <View style={styles.tagsSelectorContainer}>
-                  {tagsDisponiveis.map((tag) => (
-                    <TouchableOpacity
-                      key={tag}
-                      style={[
-                        styles.tagSelector,
-                        novoCompromisso.tags.includes(tag) && styles.tagSelectorActive
-                      ]}
-                      onPress={() => {
-                        setNovoCompromisso(prev => {
-                          const newTags = prev.tags.includes(tag)
-                            ? prev.tags.filter(t => t !== tag)
-                            : [...prev.tags, tag];
-                          return { ...prev, tags: newTags };
-                        });
-                      }}
-                    >
-                      <Text style={[
-                        styles.tagSelectorText,
-                        novoCompromisso.tags.includes(tag) && styles.tagSelectorTextActive
-                      ]}>
-                        {tag}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={styles.cancelButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.saveButton}
-                onPress={handleAdicionarCompromisso}
-              >
-                <Text style={styles.saveButtonText}>Salvar</Text>
-              </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Título</Text>
+              <TextInput
+                style={styles.input}
+                value={compromissoSelecionado?.titulo}
+                onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, titulo: text} : null)}
+              />
             </View>
-          </KeyboardAvoidingView>
-        </Modal>
-      </View>
-    </SafeAreaView>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Data</Text>
+              <TextInput
+                style={styles.input}
+                value={compromissoSelecionado?.data}
+                onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, data: text} : null)}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Horário</Text>
+              <TextInput
+                style={styles.input}
+                value={compromissoSelecionado?.horario}
+                onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, horario: text} : null)}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Local</Text>
+              <TextInput
+                style={styles.input}
+                value={compromissoSelecionado?.local}
+                onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, local: text} : null)}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Anotação</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={compromissoSelecionado?.anotacao}
+                onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, anotacao: text} : null)}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Cliente</Text>
+              <TextInput
+                style={styles.input}
+                value={compromissoSelecionado?.cliente}
+                onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, cliente: text} : null)}
+                placeholder="Digite o nome do cliente"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Imóvel</Text>
+              <TextInput
+                style={styles.input}
+                value={compromissoSelecionado?.imovel}
+                onChangeText={(text) => setCompromissoSelecionado(prev => prev ? {...prev, imovel: text} : null)}
+                placeholder="Digite o tipo e endereço do imóvel"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Tags</Text>
+              <View style={styles.tagsSelectorContainer}>
+                {tagsDisponiveis.map((tag) => (
+                  <TouchableOpacity
+                    key={tag}
+                    style={[
+                      styles.tagSelector,
+                      compromissoSelecionado?.tags.includes(tag) && styles.tagSelectorActive
+                    ]}
+                    onPress={() => {
+                      setCompromissoSelecionado(prev => {
+                        if (!prev) return null;
+                        const newTags = prev.tags.includes(tag)
+                          ? prev.tags.filter(t => t !== tag)
+                          : [...prev.tags, tag];
+                        return { ...prev, tags: newTags };
+                      });
+                    }}
+                  >
+                    <Text style={[
+                      styles.tagSelectorText,
+                      compromissoSelecionado?.tags.includes(tag) && styles.tagSelectorTextActive
+                    ]}>
+                      {tag}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      <Modal
+        isVisible={modalVisible}
+        onBackdropPress={() => {
+          setModalVisible(false);
+          setErroValidacao(null);
+        }}
+        style={styles.modal}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalContent}
+        >
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Novo Compromisso</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView 
+            style={styles.modalForm}
+            keyboardShouldPersistTaps="handled"
+          >
+            {erroValidacao && (
+              <View style={styles.erroContainer}>
+                <Text style={styles.erroText}>{erroValidacao}</Text>
+              </View>
+            )}
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Data</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCompromisso.data}
+                onChangeText={(text) => setNovoCompromisso({...novoCompromisso, data: text})}
+                placeholder="Ex: 15/04/2024"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Horário</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCompromisso.horario}
+                onChangeText={(text) => setNovoCompromisso({...novoCompromisso, horario: text})}
+                placeholder="Ex: 14:00"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Título</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCompromisso.titulo}
+                onChangeText={(text) => setNovoCompromisso({...novoCompromisso, titulo: text})}
+                placeholder="Digite o título do compromisso"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Local</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCompromisso.local}
+                onChangeText={(text) => setNovoCompromisso({...novoCompromisso, local: text})}
+                placeholder="Digite o local do compromisso"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Anotação</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={novoCompromisso.anotacao}
+                onChangeText={(text) => setNovoCompromisso({...novoCompromisso, anotacao: text})}
+                placeholder="Digite uma anotação (opcional)"
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Cliente</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCompromisso.cliente}
+                onChangeText={(text) => setNovoCompromisso({...novoCompromisso, cliente: text})}
+                placeholder="Digite o nome do cliente"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Imóvel</Text>
+              <TextInput
+                style={styles.input}
+                value={novoCompromisso.imovel}
+                onChangeText={(text) => setNovoCompromisso({...novoCompromisso, imovel: text})}
+                placeholder="Digite o tipo e endereço do imóvel"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Tags</Text>
+              <View style={styles.tagsSelectorContainer}>
+                {tagsDisponiveis.map((tag) => (
+                  <TouchableOpacity
+                    key={tag}
+                    style={[
+                      styles.tagSelector,
+                      novoCompromisso.tags.includes(tag) && styles.tagSelectorActive
+                    ]}
+                    onPress={() => {
+                      setNovoCompromisso(prev => {
+                        const newTags = prev.tags.includes(tag)
+                          ? prev.tags.filter(t => t !== tag)
+                          : [...prev.tags, tag];
+                        return { ...prev, tags: newTags };
+                      });
+                    }}
+                  >
+                    <Text style={[
+                      styles.tagSelectorText,
+                      novoCompromisso.tags.includes(tag) && styles.tagSelectorTextActive
+                    ]}>
+                      {tag}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.saveButton}
+              onPress={handleAdicionarCompromisso}
+            >
+              <Text style={styles.saveButtonText}>Salvar</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: 'white',
-    paddingTop: Platform.OS === 'android' ? 25 : 0,
-  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    height: 60,
   },
-  title: {
+  headerContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerLeft: {
+    alignItems: 'center',
+  },
+  headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 15,
     color: '#333',
   },
-  selectorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
+  filtrosContainer: {
+    padding: 10,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  selectorButton: {
-    flex: 1,
-    paddingVertical: 10,
+  filtroButton: {
     paddingHorizontal: 15,
-    borderRadius: 8,
-    marginHorizontal: 5,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
     backgroundColor: '#f0f0f0',
   },
-  selectorButtonActive: {
+  filtroButtonAtivo: {
     backgroundColor: '#007AFF',
   },
-  selectorText: {
-    textAlign: 'center',
+  filtroButtonText: {
     color: '#666',
-    fontWeight: '500',
+    fontSize: 14,
   },
-  selectorTextActive: {
+  filtroButtonTextAtivo: {
     color: 'white',
   },
   listaContainer: {
